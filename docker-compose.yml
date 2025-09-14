@@ -6,8 +6,8 @@ services:
       POSTGRES_USER: ${PG_USERNAME}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       POSTGRES_DB: ${PG_DATABASE}
-    volumes:
-      - ./data:/var/lib/postgresql/data
+    # volumes: #uncomment this to persist data
+    #   - ./data:/var/lib/postgresql/data
     ports:
       - 5432:5432
     env_file: ".env"
