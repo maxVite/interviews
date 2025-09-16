@@ -28,15 +28,14 @@
       @click:close="() => refetch()" />
 
     <!-- Empty State -->
-    <v-card v-else-if="filteredEmployees.length === 0" class="text-center py-12" elevation="2">
+    <v-card v-else-if="employees?.length === 0" class="text-center py-12" elevation="2">
       <v-card-text>
         <v-icon size="64" color="grey-lighten-1" class="mb-4">
           mdi-account-group-outline
         </v-icon>
         <h3 class="text-h5 mb-2">No employees found</h3>
         <p class="text-body-1 text-grey">
-          {{ employeesStore.searchQuery ? 'Try adjusting your search criteria' : 'Start by adding your first employee'
-          }}
+          {{ employeesStore.searchQuery ? 'Try adjusting your search criteria' : 'Start by adding your first employee' }}
         </p>
         <v-btn v-if="!employeesStore.searchQuery" color="primary" variant="elevated" class="mt-4"
           @click="showCreateDialog = true">
@@ -48,18 +47,18 @@
 
     <!-- Employees List -->
     <div v-else class="employees-grid">
-      <v-card v-for="employee in filteredEmployees" :key="employee.id" elevation="2" hover class="employee-card"
+      <v-card v-for="employee in employees" :key="employee.id" elevation="2" hover class="employee-card"
         @click="navigateToEmployee(employee.id)">
         <v-card-text>
           <div class="d-flex align-center mb-3">
             <v-avatar color="primary" size="48" class="mr-4">
               <span class="text-h6 font-weight-bold">
-                {{ getInitials(employee.name, employee.lastName) }}
+                {{ getInitials(employee.firstName, employee.lastNames) }}
               </span>
             </v-avatar>
             <div class="flex-grow-1">
               <h3 class="text-h6 font-weight-bold">
-                {{ employee.name }} {{ employee.lastName }}
+                {{ employee.firstName }} {{ employee.lastNames }}
               </h3>
               <p class="text-body-2 text-grey mb-0">
                 {{ employee.email }}
@@ -119,7 +118,7 @@
           Delete Employee
         </v-card-title>
         <v-card-text>
-          Are you sure you want to delete {{ employeeToDelete?.name }} {{ employeeToDelete?.lastName }}?
+          Are you sure you want to delete {{ employeeToDelete?.firstName }} {{ employeeToDelete?.lastNames }}?
           This action cannot be undone.
         </v-card-text>
         <v-card-actions>
@@ -141,7 +140,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEmployeesStore } from '@/stores/employees'
-import { useEmployees, useDeleteEmployee, useFilteredEmployees } from '@/composables/useEmployees'
+import { useEmployees, useDeleteEmployee } from '@/composables/useEmployees'
 import { formatDate } from '@/utils/date'
 import type { Employee } from '@/types'
 import EmployeeForm from '@/components/EmployeeForm.vue'
@@ -149,8 +148,8 @@ import EmployeeForm from '@/components/EmployeeForm.vue'
 const router = useRouter()
 const employeesStore = useEmployeesStore()
 
-
-const { data: employees, isLoading, error, refetch } = useEmployees()
+const searchQuery = computed(() => employeesStore.searchQuery)
+const { data: employees, isLoading, error, refetch } = useEmployees(searchQuery)
 const deleteEmployeeMutation = useDeleteEmployee()
 
 const showCreateDialog = ref(false)
@@ -158,10 +157,6 @@ const showDeleteDialog = ref(false)
 const selectedEmployee = ref<Employee | null>(null)
 const employeeToDelete = ref<Employee | null>(null)
 
-const filteredEmployees = computed(() => {
-  if (!employees.value) return []
-  return useFilteredEmployees(employees.value, employeesStore.searchQuery).value
-})
 
 const handleSearch = (value: string) => {
   employeesStore.setSearchQuery(value)
@@ -197,6 +192,7 @@ const handleEmployeeSaved = () => {
   showCreateDialog.value = false
   selectedEmployee.value = null
 }
+
 </script>
 
 <style scoped>

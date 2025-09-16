@@ -2,16 +2,20 @@ import { z } from "zod";
 
 export const EmployeeSchema = z.object({
   id: z.string(),
-  name: z.string().min(1, "Name is required").max(50, "Name too long"),
-  lastName: z
+  firstName: z
     .string()
-    .min(1, "Last name is required")
-    .max(50, "Last name too long"),
+    .min(1, "First name is required")
+    .max(50, "First name too long"),
+  lastNames: z
+    .string()
+    .min(1, "Last names are required")
+    .max(100, "Last names too long"),
   email: z.email("Invalid email address"),
   phone: z
     .string()
     .min(7, "Phone number too short")
-    .max(20, "Phone number too long"),
+    .max(20, "Phone number too long")
+    .optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

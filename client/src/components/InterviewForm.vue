@@ -20,11 +20,11 @@
                     <template #prepend>
                       <v-avatar size="32" color="primary">
                         <span class="text-caption font-weight-bold">
-                          {{ getInitials(item.raw.name, item.raw.lastName) }}
+                          {{ getInitials(item.raw.firstName, item.raw.lastNames) }}
                         </span>
                       </v-avatar>
                     </template>
-                    <v-list-item-title>{{ item.raw.name }} {{ item.raw.lastName }}</v-list-item-title>
+                    <v-list-item-title>{{ item.raw.firstName }} {{ item.raw.lastNames }}</v-list-item-title>
                     <v-list-item-subtitle>{{ item.raw.email }}</v-list-item-subtitle>
                   </v-list-item>
                 </template>
@@ -114,9 +114,9 @@ const employeeOptions = computed(() => {
   if (!employees.value) return []
   return employees.value.map(employee => ({
     value: employee.id,
-    text: `${employee.name} ${employee.lastName}`,
-    name: employee.name,
-    lastName: employee.lastName,
+    text: `${employee.firstName} ${employee.lastNames}`,
+    firstName: employee.firstName,
+    lastNames: employee.lastNames,
     email: employee.email
   }))
 })

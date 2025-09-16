@@ -84,52 +84,52 @@ export const api = {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       const query = params.toString() ? `?${params.toString()}` : "";
-      return fetchApi<{ data: Employee[] }>(`/employees${query}`);
+      return fetchApi<Employee[]>(`/employees${query}`);
     },
 
-    getById: (id: string) => fetchApi<{ data: Employee }>(`/employees/${id}`),
+    getById: (id: string) => fetchApi<Employee>(`/employees/${id}`),
 
     create: (data: CreateEmployeeDto) => {
-      return fetchApi<{ data: Employee }>("/employees", {
+      return fetchApi<Employee>("/employees", {
         method: "POST",
         body: JSON.stringify(data),
       });
     },
 
     update: (id: string, data: UpdateEmployeeDto) => {
-      return fetchApi<{ data: Employee }>(`/employees/${id}`, {
+      return fetchApi<Employee>(`/employees/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
       });
     },
 
     delete: (id: string) =>
-      fetchApi<{ data: void }>(`/employees/${id}`, {
+      fetchApi<void>(`/employees/${id}`, {
         method: "DELETE",
       }),
   },
 
   interviews: {
-    getAll: () => fetchApi<{ data: Interview[] }>("/interviews"),
+    getAll: () => fetchApi<Interview[]>(`/interviews`),
 
     getByEmployeeId: (employeeId: string) =>
-      fetchApi<{ data: Interview[] }>(`/interviews?employeeId=${employeeId}`),
+      fetchApi<Interview[]>(`/interviews?userId=${employeeId}`),
 
     create: (data: CreateInterviewDto) => {
-      return fetchApi<{ data: Interview }>("/interviews", {
+      return fetchApi<Interview>("/interviews", {
         method: "POST",
         body: JSON.stringify(data),
       });
     },
 
     update: (id: string, data: Partial<Interview>) =>
-      fetchApi<{ data: Interview }>(`/interviews/${id}`, {
+      fetchApi<Interview>(`/interviews/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
       }),
 
     delete: (id: string) =>
-      fetchApi<{ data: void }>(`/interviews/${id}`, {
+      fetchApi<void>(`/interviews/${id}`, {
         method: "DELETE",
       }),
   },

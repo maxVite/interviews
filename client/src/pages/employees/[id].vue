@@ -41,12 +41,12 @@
             <div class="d-flex align-center">
               <v-avatar color="primary" size="80" class="mr-4">
                 <span class="text-h4 font-weight-bold">
-                  {{ getInitials(employee.name, employee.lastName) }}
+                  {{ getInitials(employee.firstName, employee.lastNames) }}
                 </span>
               </v-avatar>
               <div>
                 <h1 class="text-h4 font-weight-bold mb-1">
-                  {{ employee.name }} {{ employee.lastName }}
+                  {{ employee.firstName }} {{ employee.lastNames }}
                 </h1>
                 <p class="text-h6 text-grey mb-0">{{ employee.email }}</p>
               </div>
@@ -77,7 +77,7 @@
               <div class="employee-info">
                 <div class="info-item mb-4">
                   <label class="text-subtitle-2 text-grey-darken-1 mb-1">Full Name</label>
-                  <p class="text-h6 mb-0">{{ employee.name }} {{ employee.lastName }}</p>
+                  <p class="text-h6 mb-0">{{ employee.firstName }} {{ employee.lastNames }}</p>
                 </div>
                 <div class="info-item mb-4">
                   <label class="text-subtitle-2 text-grey-darken-1 mb-1">Email</label>
@@ -194,12 +194,12 @@ import { useRoute } from 'vue-router'
 import { useEmployee } from '@/composables/useEmployees'
 import { useEmployeeInterviews, useUpdateInterview } from '@/composables/useInterviews'
 import { formatDate } from '@/utils/date'
+import type { Interview } from '@/types'
 import EmployeeForm from '@/components/EmployeeForm.vue'
 import InterviewForm from '@/components/InterviewForm.vue'
 
 const route = useRoute()
 const employeeId = computed(() => (route.params as { id: string }).id)
-
 
 const { data: employee, isLoading: employeeLoading, error: employeeError } = useEmployee(employeeId.value)
 const { data: interviews, isLoading: interviewsLoading } = useEmployeeInterviews(employeeId.value)
@@ -241,7 +241,7 @@ const handleInterviewSaved = () => {
 }
 
 const markAsCompleted = async (interviewId: string) => {
-  const interview = interviews.value?.find(i => i.id === interviewId)
+  const interview = interviews.value?.find((i: Interview) => i.id === interviewId)
   if (interview) {
     await updateInterviewMutation.mutateAsync({
       id: interviewId,
@@ -251,7 +251,7 @@ const markAsCompleted = async (interviewId: string) => {
 }
 
 const cancelInterview = async (interviewId: string) => {
-  const interview = interviews.value?.find(i => i.id === interviewId)
+  const interview = interviews.value?.find((i: Interview) => i.id === interviewId)
   if (interview) {
     await updateInterviewMutation.mutateAsync({
       id: interviewId,

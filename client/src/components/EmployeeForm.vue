@@ -11,12 +11,12 @@
         <v-card-text>
           <v-row>
             <v-col cols="12" sm="6">
-              <v-text-field v-model="formData.name" label="First Name" variant="outlined" density="comfortable"
-                :rules="formValidation.employee.name" />
+              <v-text-field v-model="formData.firstName" label="First Name" variant="outlined" density="comfortable"
+                :rules="formValidation.employee.firstName" />
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field v-model="formData.lastName" label="Last Name" variant="outlined" density="comfortable"
-                :rules="formValidation.employee.lastName" />
+              <v-text-field v-model="formData.lastNames" label="Last Names" variant="outlined" density="comfortable"
+                :rules="formValidation.employee.lastNames" />
             </v-col>
             <v-col cols="12">
               <v-text-field v-model="formData.email" label="Email" type="email" variant="outlined" density="comfortable"
@@ -73,8 +73,8 @@ const { handleError } = useErrorHandler('EmployeeForm')
 
 const form = ref()
 const formData = reactive({
-  name: '',
-  lastName: '',
+  firstName: '',
+  lastNames: '',
   email: '',
   phone: ''
 })
@@ -85,8 +85,8 @@ const loading = computed(() =>
 )
 
 const resetForm = () => {
-  formData.name = ''
-  formData.lastName = ''
+  formData.firstName = ''
+  formData.lastNames = ''
   formData.email = ''
   formData.phone = ''
 
@@ -96,10 +96,10 @@ const resetForm = () => {
 }
 
 const populateForm = (employee: Employee) => {
-  formData.name = employee.name
-  formData.lastName = employee.lastName
+  formData.firstName = employee.firstName
+  formData.lastNames = employee.lastNames
   formData.email = employee.email
-  formData.phone = employee.phone
+  formData.phone = employee.phone || ''
 }
 
 const handleSubmit = async () => {
@@ -137,9 +137,7 @@ watch(() => props.employee, (newEmployee) => {
 }, { immediate: true })
 
 watch(() => props.modelValue, (isOpen) => {
-  if (isOpen && props.employee) {
-    populateForm(props.employee)
-  } else if (!isOpen) {
+  if (!isOpen) {
     resetForm()
   }
 })

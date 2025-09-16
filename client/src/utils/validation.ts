@@ -22,8 +22,8 @@ export const baseValidation = {
 };
 
 export const employeeFormSchema = z.object({
-  name: baseValidation.name,
-  lastName: baseValidation.name,
+  firstName: baseValidation.name,
+  lastNames: baseValidation.name,
   email: baseValidation.email,
   phone: baseValidation.phone,
 });
@@ -81,8 +81,8 @@ export interface FormValidationResult {
 
 export const formValidation = {
   employee: {
-    name: createVuetifyRules(baseValidation.name),
-    lastName: createVuetifyRules(baseValidation.name),
+    firstName: createVuetifyRules(baseValidation.name),
+    lastNames: createVuetifyRules(baseValidation.name),
     email: createVuetifyRules(baseValidation.email),
     phone: createVuetifyRules(baseValidation.phone),
   },

@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { computed } from "vue";
 import { api } from "@/services/api";
-import type { Employee, CreateEmployeeDto, UpdateEmployeeDto } from "@/types";
+import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types";
+import type { ComputedRef } from "vue";
 import { useAppStore } from "@/stores/app";
 
-export function useEmployees(search?: string) {
+export function useEmployees(searchQuery: ComputedRef<string>) {
   return useQuery({
-    queryKey: ["employees", search],
-    queryFn: () => api.employees.getAll(search),
-    select: (data) => data.data,
+    queryKey: computed(() => ["employees", searchQuery.value]),
+    queryFn: () => api.employees.getAll(searchQuery.value),
+    select: (data) => data,
   });
 }
 
@@ -16,7 +17,7 @@ export function useEmployee(id: string) {
   return useQuery({
     queryKey: ["employees", id],
     queryFn: () => api.employees.getById(id),
-    select: (data) => data.data,
+    select: (data) => data,
     enabled: !!id,
   });
 }
@@ -27,11 +28,11 @@ export function useCreateEmployee() {
 
   return useMutation({
     mutationFn: (data: CreateEmployeeDto) => api.employees.create(data),
-    onSuccess: (response) => {
+    onSuccess: (_response) => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       appStore.showSuccess("Employee created successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       appStore.showError(error.message || "Failed to create employee");
     },
   });
@@ -49,7 +50,7 @@ export function useUpdateEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       appStore.showSuccess("Employee updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       appStore.showError(error.message || "Failed to update employee");
     },
   });
@@ -66,25 +67,8 @@ export function useDeleteEmployee() {
       queryClient.removeQueries({ queryKey: ["employees", id] });
       appStore.showSuccess("Employee deleted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       appStore.showError(error.message || "Failed to delete employee");
     },
-  });
-}
-
-export function useFilteredEmployees(
-  employees: Employee[],
-  searchQuery: string,
-) {
-  return computed(() => {
-    if (!searchQuery.trim()) return employees;
-
-    const query = searchQuery.toLowerCase();
-    return employees.filter(
-      (employee) =>
-        employee.name.toLowerCase().includes(query) ||
-        employee.lastName.toLowerCase().includes(query) ||
-        employee.email.toLowerCase().includes(query),
-    );
   });
 }
