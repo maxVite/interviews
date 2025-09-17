@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
-import { computed } from "vue";
 import { api } from "@/services/api";
-import type { Interview, CreateInterviewDto } from "@/types";
+import type { CreateInterviewDto } from "@/types";
 import { useAppStore } from "@/stores/app";
+
+const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
 export function useInterviews() {
   return useQuery({
     queryKey: ["interviews"],
     queryFn: () => api.interviews.getAll(),
-    select: (data) => data.data,
+    staleTime: STALE_TIME,
   });
 }
 
@@ -16,8 +17,8 @@ export function useEmployeeInterviews(employeeId: string) {
   return useQuery({
     queryKey: ["interviews", "employee", employeeId],
     queryFn: () => api.interviews.getByEmployeeId(employeeId),
-    select: (data) => data.data,
     enabled: !!employeeId,
+    staleTime: STALE_TIME,
   });
 }
 
@@ -27,11 +28,10 @@ export function useCreateInterview() {
 
   return useMutation({
     mutationFn: (data: CreateInterviewDto) => api.interviews.create(data),
-    onSuccess: (response, variables) => {
-      // Invalidate interviews queries
+    onSuccess: (_response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["interviews"] });
       queryClient.invalidateQueries({
-        queryKey: ["interviews", "employee", variables.employeeId],
+        queryKey: ["employee", variables.employeeId],
       });
       appStore.showSuccess("Interview scheduled successfully");
     },
@@ -39,68 +39,4 @@ export function useCreateInterview() {
       appStore.showError(error.message || "Failed to schedule interview");
     },
   });
-}
-
-export function useUpdateInterview() {
-  const queryClient = useQueryClient();
-  const appStore = useAppStore();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Interview> }) =>
-      api.interviews.update(id, data),
-    onSuccess: (response) => {
-      // Invalidate all interview queries
-      queryClient.invalidateQueries({ queryKey: ["interviews"] });
-      appStore.showSuccess("Interview updated successfully");
-    },
-    onError: (error: any) => {
-      appStore.showError(error.message || "Failed to update interview");
-    },
-  });
-}
-
-export function useDeleteInterview() {
-  const queryClient = useQueryClient();
-  const appStore = useAppStore();
-
-  return useMutation({
-    mutationFn: (id: string) => api.interviews.delete(id),
-    onSuccess: () => {
-      // Invalidate all interview queries
-      queryClient.invalidateQueries({ queryKey: ["interviews"] });
-      appStore.showSuccess("Interview cancelled successfully");
-    },
-    onError: (error: any) => {
-      appStore.showError(error.message || "Failed to cancel interview");
-    },
-  });
-}
-
-export function useInterviewFilters(interviews: Interview[]) {
-  const upcomingInterviews = computed(() => {
-    const now = new Date();
-    return interviews
-      .filter((interview) => {
-        const scheduledDate = new Date(interview.scheduledAt);
-        return scheduledDate > now && interview.status === "scheduled";
-      })
-      .sort(
-        (a, b) =>
-          new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
-      );
-  });
-
-  const completedInterviews = computed(() =>
-    interviews.filter((interview) => interview.status === "completed")
-  );
-
-  const cancelledInterviews = computed(() =>
-    interviews.filter((interview) => interview.status === "cancelled")
-  );
-
-  return {
-    upcomingInterviews,
-    completedInterviews,
-    cancelledInterviews,
-  };
 }

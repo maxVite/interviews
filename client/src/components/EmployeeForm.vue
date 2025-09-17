@@ -117,7 +117,6 @@ const handleSubmit = async () => {
     }
 
     emit('saved')
-    resetForm()
   } catch (error) {
     handleError(error, { showNotifications: true, logLevel: 'warn' })
   }
@@ -128,16 +127,10 @@ const handleCancel = () => {
   resetForm()
 }
 
-watch(() => props.employee, (newEmployee) => {
-  if (newEmployee) {
-    populateForm(newEmployee)
-  } else {
-    resetForm()
-  }
-}, { immediate: true })
-
 watch(() => props.modelValue, (isOpen) => {
-  if (!isOpen) {
+  if (isOpen && props.employee) {
+    populateForm(props.employee)
+  } else {
     resetForm()
   }
 })

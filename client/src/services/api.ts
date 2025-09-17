@@ -6,6 +6,7 @@ import type {
   CreateEmployeeDto,
   UpdateEmployeeDto,
   CreateInterviewDto,
+  EmployeeDetails,
 } from "@/types";
 
 const API_BASE_URL =
@@ -87,7 +88,7 @@ export const api = {
       return fetchApi<Employee[]>(`/employees${query}`);
     },
 
-    getById: (id: string) => fetchApi<Employee>(`/employees/${id}`),
+    getById: (id: string) => fetchApi<EmployeeDetails>(`/employees/${id}`),
 
     create: (data: CreateEmployeeDto) => {
       return fetchApi<Employee>("/employees", {
@@ -121,17 +122,6 @@ export const api = {
         body: JSON.stringify(data),
       });
     },
-
-    update: (id: string, data: Partial<Interview>) =>
-      fetchApi<Interview>(`/interviews/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-
-    delete: (id: string) =>
-      fetchApi<void>(`/interviews/${id}`, {
-        method: "DELETE",
-      }),
   },
 };
 

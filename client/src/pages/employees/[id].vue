@@ -51,8 +51,8 @@
                 <p class="text-h6 text-grey mb-0">{{ employee.email }}</p>
               </div>
             </div>
-            <div class="d-flex gap-2">
-              <v-btn color="primary" variant="elevated" @click="editEmployee">
+            <div class="d-flex">
+              <v-btn color="primary" variant="elevated" @click="editEmployee" class="mr-4">
                 <v-icon start>mdi-pencil</v-icon>
                 Edit Employee
               </v-btn>
@@ -110,15 +110,9 @@
 
         <v-col cols="12" md="6">
           <v-card elevation="2" class="h-100">
-            <v-card-title class="bg-success text-white d-flex justify-space-between align-center">
-              <div>
-                <v-icon start>mdi-calendar-account</v-icon>
-                Interviews
-              </div>
-              <v-btn variant="text" size="small" color="white" @click="showInterviewDialog = true">
-                <v-icon start>mdi-plus</v-icon>
-                Schedule
-              </v-btn>
+            <v-card-title class="bg-success text-white">
+              <v-icon start>mdi-calendar-account</v-icon>
+              Interviews
             </v-card-title>
             <v-card-text class="pt-4">
               <!-- Loading Interviews -->
@@ -129,12 +123,13 @@
 
               <!-- No Interviews -->
               <div v-else-if="employeeInterviews.length === 0" class="text-center py-8">
-                <v-icon size="48" color="grey-lighten-1" class="mb-2">
+                <v-icon size="64" color="grey-lighten-1" class="mb-4">
                   mdi-calendar-blank-outline
                 </v-icon>
-                <p class="text-body-1 text-grey mb-4">No interviews scheduled</p>
-                <v-btn color="success" variant="elevated" size="small" @click="showInterviewDialog = true">
-                  <v-icon start>mdi-plus</v-icon>
+                <h4 class="text-h6 mb-2">No interviews scheduled</h4>
+                <p class="text-body-2 text-grey mb-6">This employee doesn't have any interviews yet.</p>
+                <v-btn color="success" variant="elevated" @click="showInterviewDialog = true">
+                  <v-icon start>mdi-calendar-plus</v-icon>
                   Schedule First Interview
                 </v-btn>
               </div>
@@ -159,14 +154,6 @@
                     </div>
                   </v-card-text>
                   <v-card-actions class="pt-0">
-                    <v-btn v-if="interview.status === 'scheduled'" variant="text" color="success" size="small"
-                      @click="markAsCompleted(interview.id)">
-                      Mark as Completed
-                    </v-btn>
-                    <v-btn v-if="interview.status === 'scheduled'" variant="text" color="error" size="small"
-                      @click="cancelInterview(interview.id)">
-                      Cancel
-                    </v-btn>
                     <v-spacer />
                     <span class="text-caption text-grey">
                       Created {{ formatDate.short(interview.createdAt) }}
@@ -192,9 +179,7 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEmployee } from '@/composables/useEmployees'
-import { useEmployeeInterviews, useUpdateInterview } from '@/composables/useInterviews'
 import { formatDate } from '@/utils/date'
-import type { Interview } from '@/types'
 import EmployeeForm from '@/components/EmployeeForm.vue'
 import InterviewForm from '@/components/InterviewForm.vue'
 
@@ -202,18 +187,18 @@ const route = useRoute()
 const employeeId = computed(() => (route.params as { id: string }).id)
 
 const { data: employee, isLoading: employeeLoading, error: employeeError } = useEmployee(employeeId.value)
-const { data: interviews, isLoading: interviewsLoading } = useEmployeeInterviews(employeeId.value)
-const updateInterviewMutation = useUpdateInterview()
 
 const showEditDialog = ref(false)
 const showInterviewDialog = ref(false)
 
 const employeeInterviews = computed(() => {
-  if (!interviews.value) return []
-  return [...interviews.value].sort((a, b) =>
+  if (!employee.value?.interviews) return []
+  return [...employee.value.interviews].sort((a, b) =>
     new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
   )
 })
+
+const interviewsLoading = computed(() => employeeLoading.value)
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
@@ -240,25 +225,6 @@ const handleInterviewSaved = () => {
   showInterviewDialog.value = false
 }
 
-const markAsCompleted = async (interviewId: string) => {
-  const interview = interviews.value?.find((i: Interview) => i.id === interviewId)
-  if (interview) {
-    await updateInterviewMutation.mutateAsync({
-      id: interviewId,
-      data: { status: 'completed' }
-    })
-  }
-}
-
-const cancelInterview = async (interviewId: string) => {
-  const interview = interviews.value?.find((i: Interview) => i.id === interviewId)
-  if (interview) {
-    await updateInterviewMutation.mutateAsync({
-      id: interviewId,
-      data: { status: 'cancelled' }
-    })
-  }
-}
 </script>
 
 <style scoped>

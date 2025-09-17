@@ -49,10 +49,25 @@ export const CreateInterviewSchema = InterviewSchema.omit({
   updatedAt: true,
 });
 
+export const InterviewSummarySchema = z.object({
+  id: z.string(),
+  position: z.string(),
+  notes: z.string().optional(),
+  status: z.enum(["scheduled", "completed", "cancelled"]),
+  scheduledAt: z.string(),
+  createdAt: z.string(),
+});
+
+export const EmployeeDetailsSchema = EmployeeSchema.extend({
+  interviews: z.array(InterviewSummarySchema),
+});
+
 export type Employee = z.infer<typeof EmployeeSchema>;
+export type EmployeeDetails = z.infer<typeof EmployeeDetailsSchema>;
 export type CreateEmployeeDto = z.infer<typeof CreateEmployeeSchema>;
 export type UpdateEmployeeDto = z.infer<typeof UpdateEmployeeSchema>;
 export type Interview = z.infer<typeof InterviewSchema>;
+export type InterviewSummary = z.infer<typeof InterviewSummarySchema>;
 export type CreateInterviewDto = z.infer<typeof CreateInterviewSchema>;
 export type ApiResponse<T> = { data: T; message?: string };
 

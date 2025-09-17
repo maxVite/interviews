@@ -156,7 +156,6 @@ const handleSubmit = async () => {
     await createInterviewMutation.mutateAsync(createData)
 
     emit('saved')
-    resetForm()
   } catch (error) {
     handleError(error, { showNotifications: true, logLevel: 'warn' })
   }

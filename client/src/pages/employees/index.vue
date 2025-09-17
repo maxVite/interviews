@@ -11,9 +11,8 @@
     <!-- Search Bar -->
     <v-card class="mb-6" elevation="2">
       <v-card-text>
-        <v-text-field v-model="employeesStore.searchQuery" placeholder="Search by name or email..."
-          prepend-inner-icon="mdi-magnify" variant="outlined" density="comfortable" clearable hide-details
-          @update:model-value="handleSearch" />
+        <v-text-field v-model="searchQuery" placeholder="Search by name or email..." prepend-inner-icon="mdi-magnify"
+          variant="outlined" density="comfortable" clearable hide-details />
       </v-card-text>
     </v-card>
 
@@ -28,17 +27,17 @@
       @click:close="() => refetch()" />
 
     <!-- Empty State -->
-    <v-card v-else-if="employees?.length === 0" class="text-center py-12" elevation="2">
+    <v-card v-else-if="filteredEmployees.length === 0" class="text-center py-12" elevation="2">
       <v-card-text>
         <v-icon size="64" color="grey-lighten-1" class="mb-4">
           mdi-account-group-outline
         </v-icon>
         <h3 class="text-h5 mb-2">No employees found</h3>
         <p class="text-body-1 text-grey">
-          {{ employeesStore.searchQuery ? 'Try adjusting your search criteria' : 'Start by adding your first employee' }}
+          {{ searchQuery ? 'Try adjusting your search criteria' : 'Start by adding your first employee'
+          }}
         </p>
-        <v-btn v-if="!employeesStore.searchQuery" color="primary" variant="elevated" class="mt-4"
-          @click="showCreateDialog = true">
+        <v-btn v-if="!searchQuery" color="primary" variant="elevated" class="mt-4" @click="showCreateDialog = true">
           <v-icon start>mdi-plus</v-icon>
           Add Employee
         </v-btn>
@@ -47,7 +46,7 @@
 
     <!-- Employees List -->
     <div v-else class="employees-grid">
-      <v-card v-for="employee in employees" :key="employee.id" elevation="2" hover class="employee-card"
+      <v-card v-for="employee in filteredEmployees" :key="employee.id" elevation="2" hover class="employee-card"
         @click="navigateToEmployee(employee.id)">
         <v-card-text>
           <div class="d-flex align-center mb-3">
@@ -139,28 +138,24 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useEmployeesStore } from '@/stores/employees'
 import { useEmployees, useDeleteEmployee } from '@/composables/useEmployees'
 import { formatDate } from '@/utils/date'
 import type { Employee } from '@/types'
 import EmployeeForm from '@/components/EmployeeForm.vue'
 
 const router = useRouter()
-const employeesStore = useEmployeesStore()
 
-const searchQuery = computed(() => employeesStore.searchQuery)
-const { data: employees, isLoading, error, refetch } = useEmployees(searchQuery)
+const searchQuery = ref('')
+const searchQueryComputed = computed(() => searchQuery.value)
+const { data: employees, isLoading, error, refetch } = useEmployees(searchQueryComputed)
+
+const filteredEmployees = computed(() => employees.value || [])
 const deleteEmployeeMutation = useDeleteEmployee()
 
 const showCreateDialog = ref(false)
 const showDeleteDialog = ref(false)
 const selectedEmployee = ref<Employee | null>(null)
 const employeeToDelete = ref<Employee | null>(null)
-
-
-const handleSearch = (value: string) => {
-  employeesStore.setSearchQuery(value)
-}
 
 const navigateToEmployee = (id: string) => {
   router.push(`/employees/${id}`)

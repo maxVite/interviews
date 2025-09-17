@@ -16,6 +16,7 @@ import {
   EmployeeQueryDto,
   EmployeeResponseDto,
 } from './dto';
+import { EmployeeDetailsResponseDto } from './dto/employee-response.dto';
 
 @Controller('employees')
 export class EmployeesController {
@@ -26,6 +27,13 @@ export class EmployeesController {
     @Query() query: EmployeeQueryDto,
   ): Promise<EmployeeResponseDto[]> {
     return this.employeesService.getAll(query.search);
+  }
+
+  @Get(':id')
+  async getEmployee(
+    @Param('id') id: string,
+  ): Promise<EmployeeDetailsResponseDto> {
+    return this.employeesService.getById(id);
   }
 
   @Post()

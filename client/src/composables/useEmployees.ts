@@ -1,24 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { computed } from "vue";
+import type { ComputedRef } from "vue";
 import { api } from "@/services/api";
 import type { CreateEmployeeDto, UpdateEmployeeDto } from "@/types";
-import type { ComputedRef } from "vue";
 import { useAppStore } from "@/stores/app";
 
-export function useEmployees(searchQuery: ComputedRef<string>) {
+const STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
+export function useEmployees(searchQuery?: ComputedRef<string>) {
   return useQuery({
-    queryKey: computed(() => ["employees", searchQuery.value]),
-    queryFn: () => api.employees.getAll(searchQuery.value),
-    select: (data) => data,
+    queryKey: computed(() => ["employees", searchQuery?.value]),
+    queryFn: () => api.employees.getAll(searchQuery?.value),
+    staleTime: STALE_TIME,
   });
 }
 
 export function useEmployee(id: string) {
   return useQuery({
-    queryKey: ["employees", id],
+    queryKey: ["employee", id],
     queryFn: () => api.employees.getById(id),
-    select: (data) => data,
     enabled: !!id,
+    staleTime: STALE_TIME,
   });
 }
 
@@ -28,8 +30,9 @@ export function useCreateEmployee() {
 
   return useMutation({
     mutationFn: (data: CreateEmployeeDto) => api.employees.create(data),
-    onSuccess: (_response) => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.setQueryData(["employee", response.id], response);
       appStore.showSuccess("Employee created successfully");
     },
     onError: (error: Error) => {
@@ -46,7 +49,7 @@ export function useUpdateEmployee() {
     mutationFn: ({ id, data }: { id: string; data: UpdateEmployeeDto }) =>
       api.employees.update(id, data),
     onSuccess: (response, variables) => {
-      queryClient.setQueryData(["employees", variables.id], response);
+      queryClient.setQueryData(["employee", variables.id], response);
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       appStore.showSuccess("Employee updated successfully");
     },
@@ -64,7 +67,7 @@ export function useDeleteEmployee() {
     mutationFn: (id: string) => api.employees.delete(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
-      queryClient.removeQueries({ queryKey: ["employees", id] });
+      queryClient.removeQueries({ queryKey: ["employee", id] });
       appStore.showSuccess("Employee deleted successfully");
     },
     onError: (error: Error) => {
