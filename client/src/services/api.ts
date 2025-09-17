@@ -31,8 +31,8 @@ async function fetchApi<T>(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({
-        message: "Network error",
-        code: "NETWORK_ERROR",
+        message: `HTTP ${response.status}: ${response.statusText || "Unknown error"}`,
+        code: "HTTP_ERROR",
       }));
 
       const apiError = new ApiError(
@@ -44,10 +44,9 @@ async function fetchApi<T>(
 
       const errorType = classifyError(apiError);
 
-      const shouldShowNotification = ![
-        ErrorTypes.VALIDATION,
-        ErrorTypes.AUTHENTICATION,
-      ].includes(errorType as any);
+      const shouldShowNotification =
+        errorType !== ErrorTypes.VALIDATION &&
+        errorType !== ErrorTypes.AUTHENTICATION;
 
       handleError(apiError, "API Request", {
         showNotifications: shouldShowNotification,
@@ -55,6 +54,10 @@ async function fetchApi<T>(
       });
 
       throw apiError;
+    }
+
+    if (response.status === 204) {
+      return undefined as T;
     }
 
     return await response.json();

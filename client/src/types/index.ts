@@ -30,7 +30,7 @@ export const UpdateEmployeeSchema = CreateEmployeeSchema.partial();
 
 export const InterviewSchema = z.object({
   id: z.string(),
-  employeeId: z.string(),
+  userId: z.string(),
   position: z
     .string()
     .min(1, "Position is required")
@@ -42,11 +42,14 @@ export const InterviewSchema = z.object({
   updatedAt: z.string(),
 });
 
-export const CreateInterviewSchema = InterviewSchema.omit({
-  id: true,
-  status: true,
-  createdAt: true,
-  updatedAt: true,
+export const CreateInterviewSchema = z.object({
+  userId: z.uuid("Invalid user ID format"),
+  position: z
+    .string()
+    .min(1, "Position is required")
+    .max(100, "Position too long"),
+  scheduledAt: z.string(),
+  notes: z.string().max(500, "Notes too long").optional(),
 });
 
 export const InterviewSummarySchema = z.object({

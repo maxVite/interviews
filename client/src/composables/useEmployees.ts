@@ -35,9 +35,6 @@ export function useCreateEmployee() {
       queryClient.setQueryData(["employee", response.id], response);
       appStore.showSuccess("Employee created successfully");
     },
-    onError: (error: Error) => {
-      appStore.showError(error.message || "Failed to create employee");
-    },
   });
 }
 
@@ -53,9 +50,6 @@ export function useUpdateEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       appStore.showSuccess("Employee updated successfully");
     },
-    onError: (error: Error) => {
-      appStore.showError(error.message || "Failed to update employee");
-    },
   });
 }
 
@@ -69,9 +63,6 @@ export function useDeleteEmployee() {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.removeQueries({ queryKey: ["employee", id] });
       appStore.showSuccess("Employee deleted successfully");
-    },
-    onError: (error: Error) => {
-      appStore.showError(error.message || "Failed to delete employee");
     },
   });
 }

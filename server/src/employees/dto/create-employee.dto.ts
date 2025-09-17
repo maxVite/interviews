@@ -4,8 +4,6 @@ import {
   IsOptional,
   MinLength,
   MaxLength,
-  Matches,
-  IsPhoneNumber,
 } from 'class-validator';
 
 export class CreateEmployeeDto {
@@ -21,6 +19,5 @@ export class CreateEmployeeDto {
   lastNames: string;
   @IsOptional()
   @IsString()
-  @IsPhoneNumber()
   phone?: string;
 }

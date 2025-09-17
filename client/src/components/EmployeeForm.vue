@@ -71,8 +71,8 @@ const createEmployeeMutation = useCreateEmployee()
 const updateEmployeeMutation = useUpdateEmployee()
 const { handleError } = useErrorHandler('EmployeeForm')
 
-const form = ref()
-const formData = reactive({
+const form = ref<{ resetValidation: () => void; validate: () => Promise<{ valid: boolean }> }>()
+const formData = reactive<CreateEmployeeDto>({
   firstName: '',
   lastNames: '',
   email: '',
@@ -103,6 +103,8 @@ const populateForm = (employee: Employee) => {
 }
 
 const handleSubmit = async () => {
+  if (!form.value) return
+
   const { valid } = await form.value.validate() as FormValidationResult;
   if (!valid) return
 

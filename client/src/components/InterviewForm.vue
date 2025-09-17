@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { useEmployees } from '@/composables/useEmployees'
 import { useCreateInterview } from '@/composables/useInterviews'
 import { formValidation, type FormValidationResult } from '@/utils/validation'
@@ -97,7 +97,7 @@ const { data: employees, isLoading: employeesLoading } = useEmployees()
 const createInterviewMutation = useCreateInterview()
 const { handleError } = useErrorHandler('InterviewForm')
 
-const form = ref()
+const form = ref<{ resetValidation: () => void; validate: () => Promise<{ valid: boolean }> }>()
 
 const formData = reactive({
   employeeId: '',
@@ -112,23 +112,23 @@ const loading = computed(() => createInterviewMutation.isPending.value)
 
 const employeeOptions = computed(() => {
   if (!employees.value) return []
-  return employees.value.map(employee => ({
-    value: employee.id,
-    text: `${employee.firstName} ${employee.lastNames}`,
-    firstName: employee.firstName,
-    lastNames: employee.lastNames,
-    email: employee.email
+  return employees.value.map(({ id, firstName, lastNames, email }) => ({
+    value: id,
+    text: `${firstName} ${lastNames}`,
+    firstName,
+    lastNames,
+    email
   }))
 })
 
-
-
 const resetForm = () => {
-  formData.employeeId = props.employeeId || ''
-  formData.position = ''
-  formData.date = ''
-  formData.time = ''
-  formData.notes = ''
+  Object.assign(formData, {
+    employeeId: props.employeeId || '',
+    position: '',
+    date: '',
+    time: '',
+    notes: ''
+  })
 
   nextTick(() => {
     form.value?.resetValidation()
@@ -140,6 +140,8 @@ const getInitials = (firstName: string, lastName: string) => {
 }
 
 const handleSubmit = async () => {
+  if (!form.value) return
+
   const { valid } = await form.value.validate() as FormValidationResult;
   if (!valid) return
 
@@ -147,7 +149,7 @@ const handleSubmit = async () => {
     const scheduledAt = new Date(`${formData.date}T${formData.time}`).toISOString()
 
     const createData: CreateInterviewDto = {
-      employeeId: props.employeeId || formData.employeeId,
+      userId: props.employeeId || formData.employeeId,
       position: formData.position.trim(),
       scheduledAt,
       notes: formData.notes.trim() || undefined

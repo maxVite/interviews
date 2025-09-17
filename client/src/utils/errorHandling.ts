@@ -41,19 +41,19 @@ export function handleError(
   }
 }
 
-export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
-  fn: T,
+export function withErrorHandling<TArgs extends readonly unknown[], TReturn>(
+  fn: (...args: TArgs) => Promise<TReturn>,
   context?: string,
   options?: Partial<ErrorHandlingConfig>,
-): T {
-  return (async (...args: Parameters<T>) => {
+): (...args: TArgs) => Promise<TReturn> {
+  return async (...args: TArgs): Promise<TReturn> => {
     try {
       return await fn(...args);
     } catch (error) {
       handleError(error, context, options);
       throw error;
     }
-  }) as T;
+  };
 }
 
 export function useErrorHandler(context?: string) {
@@ -61,8 +61,8 @@ export function useErrorHandler(context?: string) {
     handleError: (error: unknown, options?: Partial<ErrorHandlingConfig>) =>
       handleError(error, context, options),
 
-    withErrorHandling: <T extends (...args: any[]) => Promise<any>>(
-      fn: T,
+    withErrorHandling: <TArgs extends readonly unknown[], TReturn>(
+      fn: (...args: TArgs) => Promise<TReturn>,
       options?: Partial<ErrorHandlingConfig>,
     ) => withErrorHandling(fn, context, options),
   };

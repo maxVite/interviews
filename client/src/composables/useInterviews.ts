@@ -29,14 +29,13 @@ export function useCreateInterview() {
   return useMutation({
     mutationFn: (data: CreateInterviewDto) => api.interviews.create(data),
     onSuccess: (_response, variables) => {
+      // Invalidate all interviews queries
       queryClient.invalidateQueries({ queryKey: ["interviews"] });
+      // Invalidate the employee query (which includes interviews)
       queryClient.invalidateQueries({
-        queryKey: ["employee", variables.employeeId],
+        queryKey: ["employee", variables.userId],
       });
       appStore.showSuccess("Interview scheduled successfully");
-    },
-    onError: (error: any) => {
-      appStore.showError(error.message || "Failed to schedule interview");
     },
   });
 }

@@ -1,13 +1,11 @@
 import {
   IsString,
   IsOptional,
-  IsEnum,
   IsDateString,
   MinLength,
   MaxLength,
   IsUUID,
 } from 'class-validator';
-import { InterviewStatus } from 'generated/prisma';
 
 export class CreateInterviewDto {
   @IsString()
@@ -20,8 +18,6 @@ export class CreateInterviewDto {
   notes?: string;
   @IsDateString()
   scheduledAt: string;
-  @IsEnum(InterviewStatus)
-  status: InterviewStatus;
   @IsUUID(4)
   userId: string;
 }

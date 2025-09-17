@@ -8,14 +8,12 @@ export const baseValidation = {
     .string()
     .min(7, "Phone number too short")
     .max(20, "Phone number too long")
-    .regex(
-      /^[\+]?[1-9][\d\s\-\(\)]{6,19}$/,
-      "Please enter a valid phone number",
-    ),
-  futureDate: z
-    .string()
+    .regex(/^[\+]?[\d\s\-\(\)]{7,20}$/, "Please enter a valid phone number")
+    .optional(),
+  futureDate: z.coerce
+    .date("Please enter a valid date")
     .refine(
-      (date) => isFutureDate(date),
+      (date) => isFutureDate(date.toISOString()),
       "Date must be today or in the future",
     ),
   name: z.string().min(1, "Name is required").max(50, "Name too long").trim(),
@@ -36,13 +34,7 @@ export const interviewFormSchema = z.object({
     .max(100, "Position too long")
     .trim(),
   date: baseValidation.futureDate,
-  time: z
-    .string()
-    .min(1, "Time is required")
-    .regex(
-      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-      "Please enter a valid time (HH:MM)",
-    ),
+  time: z.iso.time("Please enter a valid time (HH:MM)"),
   notes: z.string().max(500, "Notes too long").optional(),
 });
 
@@ -96,15 +88,7 @@ export const formValidation = {
         .trim(),
     ),
     date: createVuetifyRules(baseValidation.futureDate),
-    time: createVuetifyRules(
-      z
-        .string()
-        .min(1, "Time is required")
-        .regex(
-          /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-          "Please enter a valid time (HH:MM)",
-        ),
-    ),
+    time: createVuetifyRules(z.iso.time("Please enter a valid time (HH:MM)")),
     notes: createVuetifyRules(z.string().max(500, "Notes too long").optional()),
   },
 };
