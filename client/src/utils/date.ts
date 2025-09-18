@@ -1,8 +1,5 @@
 import { format, parseISO, isValid } from "date-fns";
 
-/**
- * Formatea una fecha a diferentes formatos estándar
- */
 export const formatDate = {
   short: (dateString: string | Date): string => {
     try {
@@ -29,36 +26,6 @@ export const formatDate = {
       const date =
         typeof dateString === "string" ? parseISO(dateString) : dateString;
       return isValid(date) ? format(date, "MMM d, yyyy HH:mm") : "Invalid date";
-    } catch {
-      return "Invalid date";
-    }
-  },
-
-  input: (dateString: string | Date): string => {
-    try {
-      const date =
-        typeof dateString === "string" ? parseISO(dateString) : dateString;
-      return isValid(date) ? format(date, "yyyy-MM-dd") : "";
-    } catch {
-      return "";
-    }
-  },
-
-  relative: (dateString: string | Date): string => {
-    try {
-      const date =
-        typeof dateString === "string" ? parseISO(dateString) : dateString;
-      if (!isValid(date)) return "Invalid date";
-
-      const now = new Date();
-      const diffInMs = now.getTime() - date.getTime();
-      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-      if (diffInDays === 0) return "Today";
-      if (diffInDays === 1) return "Yesterday";
-      if (diffInDays === -1) return "Tomorrow";
-      if (diffInDays > 0) return `${diffInDays} days ago`;
-      return `in ${Math.abs(diffInDays)} days`;
     } catch {
       return "Invalid date";
     }

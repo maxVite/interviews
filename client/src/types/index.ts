@@ -72,7 +72,6 @@ export type UpdateEmployeeDto = z.infer<typeof UpdateEmployeeSchema>;
 export type Interview = z.infer<typeof InterviewSchema>;
 export type InterviewSummary = z.infer<typeof InterviewSummarySchema>;
 export type CreateInterviewDto = z.infer<typeof CreateInterviewSchema>;
-export type ApiResponse<T> = { data: T; message?: string };
 
 export class ApiError extends Error {
   constructor(

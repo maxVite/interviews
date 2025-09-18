@@ -85,10 +85,12 @@ const loading = computed(() =>
 )
 
 const resetForm = () => {
-  formData.firstName = ''
-  formData.lastNames = ''
-  formData.email = ''
-  formData.phone = ''
+  Object.assign(formData, {
+    firstName: '',
+    lastNames: '',
+    email: '',
+    phone: ''
+  })
 
   nextTick(() => {
     form.value?.resetValidation()
@@ -96,10 +98,12 @@ const resetForm = () => {
 }
 
 const populateForm = (employee: Employee) => {
-  formData.firstName = employee.firstName
-  formData.lastNames = employee.lastNames
-  formData.email = employee.email
-  formData.phone = employee.phone || ''
+  Object.assign(formData, {
+    firstName: employee.firstName,
+    lastNames: employee.lastNames,
+    email: employee.email,
+    phone: employee.phone || ''
+  })
 }
 
 const handleSubmit = async () => {

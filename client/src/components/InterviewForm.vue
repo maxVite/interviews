@@ -9,29 +9,6 @@
 
       <v-form ref="form" @submit.prevent="handleSubmit">
         <v-card-text>
-          <!-- Employee Selection (if not pre-selected) -->
-          <v-row v-if="!employeeId">
-            <v-col cols="12">
-              <v-autocomplete v-model="formData.employeeId" :items="employeeOptions" item-title="text"
-                item-value="value" label="Select Employee" variant="outlined" density="comfortable"
-                :rules="formValidation.interview.employeeId" :loading="employeesLoading">
-                <template #item="{ props: itemProps, item }">
-                  <v-list-item v-bind="itemProps">
-                    <template #prepend>
-                      <v-avatar size="32" color="primary">
-                        <span class="text-caption font-weight-bold">
-                          {{ getInitials(item.raw.firstName, item.raw.lastNames) }}
-                        </span>
-                      </v-avatar>
-                    </template>
-                    <v-list-item-title>{{ item.raw.firstName }} {{ item.raw.lastNames }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ item.raw.email }}</v-list-item-subtitle>
-                  </v-list-item>
-                </template>
-              </v-autocomplete>
-            </v-col>
-          </v-row>
-
           <v-row>
             <v-col cols="12">
               <v-text-field v-model="formData.position" label="Position" variant="outlined" density="comfortable"
@@ -70,7 +47,6 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue'
-import { useEmployees } from '@/composables/useEmployees'
 import { useCreateInterview } from '@/composables/useInterviews'
 import { formValidation, type FormValidationResult } from '@/utils/validation'
 import { useErrorHandler } from '@/utils/errorHandling'
@@ -93,14 +69,12 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-const { data: employees, isLoading: employeesLoading } = useEmployees()
 const createInterviewMutation = useCreateInterview()
 const { handleError } = useErrorHandler('InterviewForm')
 
 const form = ref<{ resetValidation: () => void; validate: () => Promise<{ valid: boolean }> }>()
 
 const formData = reactive({
-  employeeId: '',
   position: '',
   date: '',
   time: '',
@@ -110,20 +84,8 @@ const formData = reactive({
 const today = computed(() => getTodayInput())
 const loading = computed(() => createInterviewMutation.isPending.value)
 
-const employeeOptions = computed(() => {
-  if (!employees.value) return []
-  return employees.value.map(({ id, firstName, lastNames, email }) => ({
-    value: id,
-    text: `${firstName} ${lastNames}`,
-    firstName,
-    lastNames,
-    email
-  }))
-})
-
 const resetForm = () => {
   Object.assign(formData, {
-    employeeId: props.employeeId || '',
     position: '',
     date: '',
     time: '',
@@ -133,10 +95,6 @@ const resetForm = () => {
   nextTick(() => {
     form.value?.resetValidation()
   })
-}
-
-const getInitials = (firstName: string, lastName: string) => {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 }
 
 const handleSubmit = async () => {
@@ -149,7 +107,7 @@ const handleSubmit = async () => {
     const scheduledAt = new Date(`${formData.date}T${formData.time}`).toISOString()
 
     const createData: CreateInterviewDto = {
-      userId: props.employeeId || formData.employeeId,
+      userId: props.employeeId || '',
       position: formData.position.trim(),
       scheduledAt,
       notes: formData.notes.trim() || undefined
@@ -173,8 +131,4 @@ watch(() => props.modelValue, (isOpen) => {
     resetForm()
   }
 })
-
-watch(() => props.employeeId, (newEmployeeId) => {
-  formData.employeeId = newEmployeeId || ''
-}, { immediate: true })
 </script>
